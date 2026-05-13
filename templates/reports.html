@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - Renewable Energy Grid</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Add Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>Renewable Energy Grid</h1>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('technicians') }}">Technicians</a>
+        <a href="{{ url_for('power_units') }}">Power Units</a>
+        <a href="{{ url_for('inspections') }}">Inspections</a>
+        <a href="{{ url_for('replacements') }}">Replacements</a>
+        <a href="{{ url_for('reports') }}">Reports</a>
+    </nav>
+
+    <div class="container">
+        <h2>System Reports</h2>
+
+        <div class="reports-grid">
+            <div class="report-card">
+                <h3>Units by Status</h3>
+                {% if units_by_status %}
+                    {% for item in units_by_status %}
+                    <div class="report-item">
+                        <span>{{ item.status }}</span>
+                        <strong>{{ item.count }}</strong>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No data available</p>
+                {% endif %}
+            </div>
+
+            <div class="report-card">
+                <h3>Inspections by Status</h3>
+                {% if inspections_by_status %}
+                    {% for item in inspections_by_status %}
+                    <div class="report-item">
+                        <span>{{ item.status }}</span>
+                        <strong>{{ item.count }}</strong>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No data available</p>
+                {% endif %}
+            </div>
+
+            <div class="report-card">
+                <h3>Units by Type</h3>
+                {% if units_by_type %}
+                    {% for item in units_by_type %}
+                    <div class="report-item">
+                        <span>{{ item.unit_type }}</span>
+                        <strong>{{ item.count }}</strong>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No data available</p>
+                {% endif %}
+            </div>
+
+            <div class="report-card">
+                <h3>Total System Capacity</h3>
+                <div class="report-item">
+                    <span>Total Capacity</span>
+                    <strong>{{ total_capacity }} MW</strong>
+                </div>
+            </div>
+        </div>
+
+        <h2>Performance Charts</h2>
+        
+        <!-- Units by Status Chart -->
+        <div class="chart-container">
+            <h3>Units by Status Distribution</h3>
+            <canvas id="statusChart" width="400" height="200"></canvas>
+        </div>
+
+        <!-- Units by Type Chart -->
+        <div class="chart-container">
+            <h3>Units by Type Distribution</h3>
+            <canvas id="typeChart" width="400" height="200"></canvas>
+        </div>
+
+        <!-- Inspections by Status Chart -->
+        <div class="chart-container">
+            <h3>Inspections by Status Distribution</h3>
+            <canvas id="inspectionChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    <script>
+        // Units by Status Chart
+        const statusData = {{ units_by_status|tojson }};
+        if (statusData && statusData.length > 0) {
+            const ctx1 = document.getElementById('statusChart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: statusData.map(item => item.status),
+                    datasets: [{
+                        label: 'Number of Units',
+                        data: statusData.map(item => item.count),
+                        backgroundColor: ['#2ecc71', '#f39c12', '#e74c3c'],
+                        borderColor: ['#27ae60', '#e67e22', '#c0392b'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            stepSize: 1,
+                            title: {
+                                display: true,
+                                text: 'Count'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Status'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Units by Type Chart
+        const typeData = {{ units_by_type|tojson }};
+        if (typeData && typeData.length > 0) {
+            const ctx2 = document.getElementById('typeChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'pie',
+                data: {
+                    labels: typeData.map(item => item.unit_type),
+                    datasets: [{
+                        label: 'Units by Type',
+                        data: typeData.map(item => item.count),
+                        backgroundColor: ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Inspections by Status Chart
+        const inspectionData = {{ inspections_by_status|tojson }};
+        if (inspectionData && inspectionData.length > 0) {
+            const ctx3 = document.getElementById('inspectionChart').getContext('2d');
+            new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: inspectionData.map(item => item.status),
+                    datasets: [{
+                        label: 'Number of Inspections',
+                        data: inspectionData.map(item => item.count),
+                        backgroundColor: '#3498db',
+                        borderColor: '#2980b9',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            stepSize: 1,
+                            title: {
+                                display: true,
+                                text: 'Count'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Status'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

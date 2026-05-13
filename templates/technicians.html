@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technicians - Renewable Energy Grid</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>Renewable Energy Grid</h1>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('technicians') }}">Technicians</a>
+        <a href="{{ url_for('power_units') }}">Power Units</a>
+        <a href="{{ url_for('inspections') }}">Inspections</a>
+        <a href="{{ url_for('replacements') }}">Replacements</a>
+        <a href="{{ url_for('reports') }}">Reports</a>
+    </nav>
+
+    <div class="container">
+        <h2>Technicians</h2>
+
+        <button class="btn" onclick="openModal('addModal')">Add Technician</button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Specialization</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if technicians %}
+                    {% for tech in technicians %}
+                    <tr>
+                        <td>{{ tech.technician_id }}</td>
+                        <td>{{ tech.technician_name }}</td>
+                        <td>{{ tech.specialization }}</td>
+                        <td>{{ tech.phone }}</td>
+                        <td>{{ tech.email }}</td>
+                        <td>
+                            <button class="btn btn-small" onclick='openEditModal({{ tech.technician_id }}, {{ tech|tojson }})'>Edit</button>
+                            <form method="POST" action="{{ url_for('delete_technician', id=tech.technician_id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this technician?')">
+                                <button type="submit" class="btn btn-small btn-delete">Delete</button>
+                            </form>
+                         </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center;">No technicians found</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Add Technician Modal -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Technician</h3>
+                <button class="close-modal" onclick="closeModal('addModal')">&times;</button>
+            </div>
+            <form method="POST" action="{{ url_for('add_technician') }}">
+                <!-- NEW FIELD: Technician ID added before Name -->
+                <div class="form-group">
+                    <label>Technician ID</label>
+                    <input type="number" name="techID" required>
+                </div>
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" name="technician_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Specialization</label>
+                    <input type="text" name="specialization" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" required>
+                </div>
+                <button type="submit" class="btn">Add Technician</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Technician Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Technician</h3>
+                <button class="close-modal" onclick="closeModal('editModal')">&times;</button>
+            </div>
+            <form method="POST" id="editTechnicianForm">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" name="technician_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Specialization</label>
+                    <input type="text" name="specialization" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" required>
+                </div>
+                <button type="submit" class="btn">Update Technician</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

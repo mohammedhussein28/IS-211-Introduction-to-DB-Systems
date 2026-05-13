@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Renewable Energy Grid</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>Renewable Energy Grid</h1>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('technicians') }}">Technicians</a>
+        <a href="{{ url_for('power_units') }}">Power Units</a>
+        <a href="{{ url_for('inspections') }}">Inspections</a>
+        <a href="{{ url_for('replacements') }}">Replacements</a>
+        <a href="{{ url_for('reports') }}">Reports</a>
+    </nav>
+
+    <div class="container">
+        <h2>Dashboard</h2>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Power Units</h3>
+                <div class="number">{{ stats.total_units }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Technicians</h3>
+                <div class="number">{{ stats.total_technicians }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Inspections</h3>
+                <div class="number">{{ stats.total_inspections }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Critical Units</h3>
+                <div class="number">{{ stats.critical_units }}</div>
+            </div>
+        </div>
+
+        <h2>Recent Inspections</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Unit</th>
+                    <th>Technician</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if recent_inspections %}
+                    {% for inspection in recent_inspections %}
+                    <tr>
+                        <td>{{ inspection.inspection_id }}</td>
+                        <td>{{ inspection.inspection_date }}</td>
+                        <td>{{ inspection.unit_name }}</td>
+                        <td>{{ inspection.technician_name }}</td>
+                        <td>
+                            <span class="status-label status-{{ inspection.status.lower() }}">
+                                {{ inspection.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center;">No recent inspections</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

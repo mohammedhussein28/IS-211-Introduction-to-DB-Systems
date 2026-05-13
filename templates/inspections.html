@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inspections - Renewable Energy Grid</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>Renewable Energy Grid</h1>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('technicians') }}">Technicians</a>
+        <a href="{{ url_for('power_units') }}">Power Units</a>
+        <a href="{{ url_for('inspections') }}">Inspections</a>
+        <a href="{{ url_for('replacements') }}">Replacements</a>
+        <a href="{{ url_for('reports') }}">Reports</a>
+    </nav>
+
+    <div class="container">
+        <h2>Inspections</h2>
+
+        <button class="btn" onclick="openModal('addModal')">Add Inspection</button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Unit</th>
+                    <th>Technician</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if inspections %}
+                    {% for inspection in inspections %}
+                    <tr>
+                        <td>{{ inspection.inspection_id }}</td>
+                        <td>{{ inspection.inspection_date }}</td>
+                        <td>{{ inspection.unit_name }}</td>
+                        <td>{{ inspection.technician_name }}</td>
+                        <td>
+                            <span class="status-label status-{{ inspection.status.lower() }}">
+                                {{ inspection.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('delete_inspection', id=inspection.inspection_id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this inspection?')">
+                                <button type="submit" class="btn btn-small btn-delete">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center;">No inspections found</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Inspection</h3>
+                <button class="close-modal" onclick="closeModal('addModal')">&times;</button>
+            </div>
+            <form method="POST" action="{{ url_for('add_inspection') }}">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Power Unit</label>
+                        <select name="unit_id" required>
+                            <option value="">Select Unit</option>
+                            {% for unit in units %}
+                            <option value="{{ unit.unit_id }}">{{ unit.unit_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Technician</label>
+                        <select name="technician_id" required>
+                            <option value="">Select Technician</option>
+                            {% for tech in technicians %}
+                            <option value="{{ tech.technician_id }}">{{ tech.technician_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Inspection Date</label>
+                        <input type="date" name="inspection_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select name="status" required>
+                            <option value="Operational">Operational</option>
+                            <option value="Underperforming">Underperforming</option>
+                            <option value="Critical">Critical</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn">Add Inspection</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

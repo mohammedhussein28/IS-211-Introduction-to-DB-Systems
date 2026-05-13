@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Replacements - Renewable Energy Grid</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>Renewable Energy Grid</h1>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('technicians') }}">Technicians</a>
+        <a href="{{ url_for('power_units') }}">Power Units</a>
+        <a href="{{ url_for('inspections') }}">Inspections</a>
+        <a href="{{ url_for('replacements') }}">Replacements</a>
+        <a href="{{ url_for('reports') }}">Reports</a>
+    </nav>
+
+    <div class="container">
+        <h2>Component Replacements</h2>
+
+        <button class="btn" onclick="openModal('addModal')">Add Replacement</button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Unit</th>
+                    <th>Component</th>
+                    <th>Quantity</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if replacements %}
+                    {% for replacement in replacements %}
+                    <tr>
+                        <td>{{ replacement.replacement_id }}</td>
+                        <td>{{ replacement.replacement_date }}</td>
+                        <td>{{ replacement.unit_name }}</td>
+                        <td>{{ replacement.component_name }}</td>
+                        <td>{{ replacement.quantity }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('delete_replacement', id=replacement.replacement_id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this replacement record?')">
+                                <button type="submit" class="btn btn-small btn-delete">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center;">No replacements found</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Replacement</h3>
+                <button class="close-modal" onclick="closeModal('addModal')">&times;</button>
+            </div>
+            <form method="POST" action="{{ url_for('add_replacement') }}">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Power Unit</label>
+                        <select name="unit_id" required>
+                            <option value="">Select Unit</option>
+                            {% for unit in units %}
+                            <option value="{{ unit.unit_id }}">{{ unit.unit_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Spare Part</label>
+                        <select name="serial_no" required>
+                            <option value="">Select Part</option>
+                            <!-- This will be populated from the spare_parts variable -->
+                            {% if spare_parts %}
+                                {% for part in spare_parts %}
+                                <option value="{{ part.serial_no }}">{{ part.serial_no }} - {{ part.part_name }}</option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="1001">1001 - Solar Panel Type A</option>
+                                <option value="1002">1002 - Solar Panel Type B</option>
+                                <option value="1003">1003 - Wind Turbine Blade</option>
+                                <option value="1004">1004 - Inverter Module</option>
+                                <option value="1005">1005 - Transformer Core</option>
+                                <option value="SP100">SP100 - Solar Panel</option>
+                                <option value="SP101">SP101 - Wind Blade</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" name="quantity" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Replacement Date</label>
+                        <input type="date" name="replacement_date" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn">Add Replacement</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
